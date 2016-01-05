@@ -10,7 +10,10 @@
   var backend = new snowmachine.CanvasBackend({
     element: document.getElementById("canvas")
   });
-  var engine = new snowmachine.KafemanEngine(backend, 100);
+  var engine = new snowmachine.SimpleEngine({
+    backend: backend,
+    angle: 45
+  });
   engine.start();
 </script>
 ```

@@ -20,35 +20,135 @@
 var snowmachine = snowmachine || {};
 
 /**
- * @param {snowmachine.Backend} backend.
- * @param {number} count - Количество снежинок.
+ * Стандартное количество снежинок.
+ * @constant {Number}
+ * @default
+ */
+snowmachine.DEFAULT_COUNT = 150;
+
+/**
+ * Стандартный FPS.
+ * @constant {Number}
+ * @default
+ */
+snowmachine.DEFAULT_FPS = 25;
+
+/**
+ * Стандартный угол.
+ * @constant {Number}
+ * @default
+ */
+snowmachine.DEFAULT_ANGLE = 45;
+
+/**
+ * Абстрактный класс движка.
+ * @param {Object} options - Настройки.
+ * @param {snowmachine.Backend} options.backend - Бекенд для рисования.
+ * @param {Number} options.count - Количество снежинок.
+ * @param {Number} options.fps - Желаемый FPS.
  * @constructor
  */
-snowmachine.KafemanEngine = function(backend, count) {
+snowmachine.Engine = function(options) {
   /**
+   * Бекенд для рисования.
    * @type {snowmachine.Backend}
    * @protected
    */
-  this.backend = backend;
+  this.backend = options.backend;
 
   /**
    * Количество снежинок.
-   * @type {number}
+   * @type {Number}
    * @protected
    */
-  this.count = count || 150;
+  this.count = options.count || snowmachine.DEFAULT_COUNT;
+
+  /**
+   * Максимальное количество кадров в секунду.
+   * @type {Number}
+   * @protected
+   */
+  this.fps = options.fps || snowmachine.DEFAULT_FPS;
+
+  /**
+   * Снежинки.
+   * @type {snowmachine.Snowflake[]}
+   * @protected
+   */
+  this.snowflakes = [];
+
+  for (var i = 0; i < this.count; i++) {
+    var x = Math.random() * this.backend.getWidth();
+    var y = Math.random() * this.backend.getHeight();
+    var radius = Math.random() * 5 + 1;
+    this.snowflakes[i] = new snowmachine.Snowflake(x, y, radius);
+  }
+
+  /**
+   * Время отрисовки последнего кадра.
+   * @type {Date}
+   * @protected
+   */
+  this.last = new Date();
 };
 
 /**
+ * Вызывается каждый кадр. Считает время, прошедшее с предыдущих расчетов.
  * @protected
  */
-snowmachine.KafemanEngine.prototype.loop = function() {
-  // TODO
+snowmachine.Engine.prototype.loop = function() {
+  var now = new Date();
+  this.timedelta = (now - this.last) / 1000;
+  this.last = now;
 };
 
 /**
- * Запускает движок.
+ * Запускает анимацию снежинок.
  */
-snowmachine.KafemanEngine.prototype.start = function() {
-  setInterval(this.loop.bind(this), 30);
+snowmachine.Engine.prototype.start = function() {
+  setInterval(this.loop.bind(this), 1000 / this.fps);
+};
+
+/**
+ * Простой движок, в котором снежинки летят по прямой.
+ * @param {Object} options - Настройки.
+ * @param {Number} options.angle - Угол падения.
+ * @constructor
+ */
+snowmachine.SimpleEngine = function(options) {
+  snowmachine.Engine.call(this, options);
+
+  /**
+   * Угол падения снежинок в градусах. При нуле падают вертикально вниз.
+   * @type {Number}
+   * @protected
+   */
+  this.angle = options.angle || snowmachine.DEFAULT_ANGLE;
+};
+
+snowmachine.SimpleEngine.prototype = Object.create(snowmachine.Engine.prototype);
+
+/**
+ * Считает положение снежинок и просит backend нарисовать их.
+ * @protected
+ */
+snowmachine.SimpleEngine.prototype.loop = function() {
+  snowmachine.Engine.prototype.loop.call(this);
+
+  this.snowflakes.forEach(function(snowflake) {
+    snowflake.x += this.timedelta * snowflake.getHorizontalSpeed() * this.angle / 45;
+    snowflake.y += this.timedelta * snowflake.getVerticalSpeed() * (90 - this.angle) / 45;
+
+    if (snowflake.x > this.backend.getWidth() + snowflake.radius) {
+      snowflake.x = -snowflake.radius;
+      snowflake.y = Math.random() * this.backend.getHeight();
+    }
+
+    if (snowflake.y > this.backend.getHeight() + snowflake.radius) {
+      snowflake.x = Math.random() * this.backend.getWidth();
+      snowflake.y = -snowflake.radius;
+    }
+  }, this);
+
+  this.backend.render(this.snowflakes);
 };
