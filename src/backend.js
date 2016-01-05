@@ -21,32 +21,55 @@ var snowmachine = snowmachine || {};
 
 /**
  * Бекенд, рисующий снежинки на HTML5-холсте.
- * @param {HTMLCanvasElement} canvas - Елемент <canvas>.
+ * @param {Object} options - Настройки.
+ * @param {HTMLCanvasElement} options.canvas - Елемент <canvas>.
  * @constructor
  */
-snowmachine.CanvasBackend = function(canvas) {
+snowmachine.CanvasBackend = function(options) {
   /**
    * Елемент <canvas>.
    * @type {HTMLCanvasElement}
    * @protected
    */
-  this.canvas = canvas;
+  this.canvas = options.element;
 
   /**
    * Контекст для рисования.
    * @type {CanvasRenderingContext2D}
    * @protected
    */
-  this.context = canvas.getContext('2d');
+  this.context = this.canvas.getContext('2d');
 };
 
 /**
  * Отображает снежинки на экране.
- * @param {?} snowflakes - Массив снежинок.
+ * @param {snowmachine.Snowflake[]} snowflakes - Массив снежинок.
  */
 snowmachine.CanvasBackend.prototype.render = function(snowflakes) {
   var context = this.context;
+
+  context.clearRect(0, 0, this.getWidth(), this.getHeight());
+  context.fillStyle = 'rgba(255, 255, 255, 0.5)';
+
   snowflakes.forEach(function(snowflake) {
-    // TODO
+    context.beginPath();
+    context.arc(snowflake.x, snowflake.y, snowflake.radius, 0, 2 * Math.PI, false);
+    context.fill();
   });
+};
+
+/**
+ * Возвращает ширину холста.
+ * @returns {Number} Ширина холста.
+ */
+snowmachine.CanvasBackend.prototype.getWidth = function() {
+  return this.canvas.width;
+};
+
+/**
+ * Возвращает высоту холста.
+ * @returns {NUmber} Высота холста.
+ */
+snowmachine.CanvasBackend.prototype.getHeight = function() {
+  return this.canvas.height;
 };
