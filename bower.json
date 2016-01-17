@@ -1,0 +1,27 @@
+{
+  "name": "snowmachine",
+  "description": "Advanced script for generating snowflakes on your site",
+  "main": "",
+  "authors": [
+    "spmbt <spmbt0@gmail.com>",
+    "kafeman <kafemanw@gmail.com>"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "snowmachine",
+    "snowflakes",
+    "snow",
+    "clubadm"
+  ],
+  "homepage": "https://github.com/clubadm/snowmachine",
+  "moduleType": [
+    "globals"
+  ],
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
