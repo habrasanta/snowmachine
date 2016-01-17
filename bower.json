@@ -1,7 +1,7 @@
 {
   "name": "snowmachine",
   "description": "Advanced script for generating snowflakes on your site",
-  "main": "",
+  "main": "build/snowmachine.min.js",
   "authors": [
     "spmbt <spmbt0@gmail.com>",
     "kafeman <kafemanw@gmail.com>"
